@@ -17,8 +17,8 @@ def processRequest(url, destination, series, parseFolder, artists, episodes):
   """ Main process that collects the podcast RSS using fetchPodcast and creates the structure for the file.
       It gets the mpg (or any other media file) into a file like variable from getMedia().
       It gets any images in the same way from getImages.
-      If the parseFolder is true then it either navigates to the parsed folder for the Named 
-      Podcast or it builds the tree, and then creates the collected files.
+      It either navigates to the parsed folder for the Named Podcast or it builds the tree, and then creates
+      the collected files.
       It then parses the metadata for the podcast and stores it as ID3 properties using putID3()
   """
   podcastStruct = fetchPodcast(url)
@@ -61,8 +61,6 @@ if __name__ == '__main__':
   parser.add_argument('url', help='URL of the podcast')
   parser.add_argument('destination', help='folder to place the podcast')
   parser.add_argument('series', default="", help='Series to place episodes.')
-  parser.add_argument('--parseFolder', action='store_true',
-                     help='Creates or maps the Podcast to a set of hierarchical folders, equivalent to an Artist and Album.')
   parser.add_argument('--artist', default='Artist', help='Set the Artist for the podcast.')
   parser.add_argument('--episodes', type=int, default=1,
                      help='How many episodes to fetch, the default is 1.')
