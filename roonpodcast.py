@@ -4,6 +4,7 @@
 import argparse
 import feedparser
 import requests
+import pytagger
 from pathlib import PurePath
 from pprint import pprint
 import sys
@@ -12,6 +13,23 @@ import sys
 def fetchPodcast(url):
   feedparser.USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
   return feedparser.parse(url)
+  
+def getMedia(link, destination, series):
+  """ Get the media file and store it in the destination.
+  """
+  urlMain = link['href'].split('?')[0]
+  print(f'urlMain:{urlMain}')
+  image = urlMain.split('/')[-1]
+  print(f'image:{image}')
+  local_file = PurePath(destination, series, image)
+  print(f'local_file {local_file}')
+  response = requests.get(link['href'], stream=True)
+  with open(local_file, 'wb') as f:
+      for chunk in response.iter_content(chunk_size=1024): 
+          if chunk: # filter out keep-alive new chunks
+              f.write(chunk)
+  print(f'Written {local_file}')
+  return local_file
 
 def processRequest(url, destination, series, parseFolder, artists, episodes):
   """ Main process that collects the podcast RSS using fetchPodcast and creates the structure for the file.
@@ -38,18 +56,9 @@ def processRequest(url, destination, series, parseFolder, artists, episodes):
       if 'type' in link:
         print('Creating image path')
         if link['type'].startswith("audio"):
-          urlMain = link['href'].split('?')[0]
-          print(f'urlMain:{urlMain}')
-          image = urlMain.split('/')[-1]
-          print(f'image:{image}')
-          local_file = PurePath(destination, series, image)
-          print(f'local_file {local_file}')
-          response = requests.get(link['href'], stream=True)
-          with open(local_file, 'wb') as f:
-              for chunk in response.iter_content(chunk_size=1024): 
-                  if chunk: # filter out keep-alive new chunks
-                      f.write(chunk)
-          print(f'Written {local_file}')
+          imageFileName = getMedia(link, destination, series)
+          
+
  
 
 
