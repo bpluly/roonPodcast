@@ -4,8 +4,8 @@
 import argparse
 import feedparser
 import requests
-import pytagger
-from pathlib import PurePath
+
+from pathlib import PurePath, Path
 from pprint import pprint
 import sys
 
@@ -14,6 +14,23 @@ def fetchPodcast(url):
   feedparser.USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
   return feedparser.parse(url)
   
+def validatePaths(destination, series):
+  """ Validate the destination's existence, if it isn't then return False
+      as it's really too messy to recover from.  If destination/series doesn't exist
+      then create it and return True, if the creation fails return False
+  """
+  if Path(destination).exists() == False:
+    print(f'The destination {destination} does not exist.')
+    return False
+  seriesPath =  Path(destination, series)
+  if seriesPath.exists() == False:
+    try:
+      seriesPath.mkdir()
+    except IOError as e:
+      print(f'Failed to create {series}, exception {e}')
+      return False
+  return True
+      
 def getMedia(link, destination, series):
   """ Get the media file and store it in the destination.
   """
@@ -21,6 +38,9 @@ def getMedia(link, destination, series):
   print(f'urlMain:{urlMain}')
   image = urlMain.split('/')[-1]
   print(f'image:{image}')
+  isValidPath = validatePaths(destination, series)
+  if isValidPath == False:
+    return None
   local_file = PurePath(destination, series, image)
   print(f'local_file {local_file}')
   response = requests.get(link['href'], stream=True)
@@ -30,8 +50,9 @@ def getMedia(link, destination, series):
               f.write(chunk)
   print(f'Written {local_file}')
   return local_file
+  
 
-def processRequest(url, destination, series, parseFolder, artists, episodes):
+def processRequest(url, destination, series, artists, episodes):
   """ Main process that collects the podcast RSS using fetchPodcast and creates the structure for the file.
       It gets the mpg (or any other media file) into a file like variable from getMedia().
       It gets any images in the same way from getImages.
@@ -57,7 +78,7 @@ def processRequest(url, destination, series, parseFolder, artists, episodes):
         print('Creating image path')
         if link['type'].startswith("audio"):
           imageFileName = getMedia(link, destination, series)
-          
+
 
  
 
@@ -75,4 +96,4 @@ if __name__ == '__main__':
                      help='How many episodes to fetch, the default is 1.')
   args = parser.parse_args()
   
-  processRequest(args.url, args.destination, args.series, args.parseFolder, args.artist, args.episodes)
+  processRequest(args.url, args.destination, args.series, args.artist, args.episodes)
