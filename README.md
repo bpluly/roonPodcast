@@ -16,5 +16,9 @@ Switches
 
 `--episodes` the number of episodes to collect. RSS feeds are in most recent order, using 1 for episodes it will collect the last one. 1 is the default.
 
+### Use
+If the destination folder is in the tree that Roon scans for music files or changes in the catalogue then it will be added to the Library. Whilst there is no individual UI for podcasts they do contain the tag _genre_ podcast and can be selected from the Genres menu.
+This doesn't give subscriptions to podcasts or RSS feeds wrapping _roonPodcast_ in a batch file or shell script and then adding that to crontab or Task Scheduler will give you an effective subscription.
+
 
 
