@@ -7,8 +7,11 @@ import requests
 
 from pathlib import PurePath, Path
 from pprint import pprint
-import sys
+import sys, subprocess
 
+MUTAGEN = "D:\Python311\Scripts\mid3v2.exe"
+ARTIST = "--artist"
+TRACK = "--track"
 
 def fetchPodcast(url):
   feedparser.USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
@@ -31,6 +34,14 @@ def validatePaths(destination, series):
       return False
   return True
       
+def setID3Property(file, property=None, value=None):
+  """ Run the utility to set properties in the sound file.
+  """
+  propertyString = property.join(value)
+  subprocess.call([MUTAGEN, file, property, value])
+  
+
+  
 def getMedia(link, destination, series):
   """ Get the media file and store it in the destination.
   """
@@ -61,7 +72,7 @@ def processRequest(url, destination, series, artists, episodes):
       It then parses the metadata for the podcast and stores it as ID3 properties using putID3()
   """
   podcastStruct = fetchPodcast(url)
-  for i in range(0,episodes - 1):
+  for i in range(0,episodes):
     entry = podcastStruct['entries'][i]
     podcast = {}
     podcast['title'] = entry['title']
@@ -71,13 +82,18 @@ def processRequest(url, destination, series, artists, episodes):
       podcast['artist'] = artists
     if series != "":
       podcast['series'] = series
-      
+    if 'itunes_episode' in entry:
+      podcast['track'] = entry['itunes_episode']
+    else:
+      podcast['track'] = entry['episode']
     for link in entry['links']:
       print(f"Link {link['type']} begins with {link['type'].startswith('audio')}")
       if 'type' in link:
         print('Creating image path')
         if link['type'].startswith("audio"):
-          imageFileName = getMedia(link, destination, series)
+          soundFileName = getMedia(link, destination, series)
+          setID3Property(soundFileName, property=ARTIST, value=podcast['artist'])
+          setID3Property(soundFileName, property=TRACK, value=podcast['track'])
 
 
  
