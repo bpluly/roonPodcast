@@ -20,5 +20,5 @@ Switches
 If the destination folder is in the tree that Roon scans for music files or changes in the catalogue then it will be added to the Library. Whilst there is no individual UI for podcasts they do contain the tag _genre_ podcast and can be selected from the Genres menu.
 This doesn't give subscriptions to podcasts or RSS feeds wrapping _roonPodcast_ in a batch file or shell script and then adding that to crontab or Task Scheduler will give you an effective subscription.
 
-
+There is a hard dependency on Mutagen which is used to fixup the Artist and Track properties. It's not used as a library as Mutagen is a GPL2... onwards licence. A Pure Python alternative might be fixed up at a later date. There is no Build/Install step at the moment (TBD), use > Python 3.8, it was written and tested using Python 3.11.
 
