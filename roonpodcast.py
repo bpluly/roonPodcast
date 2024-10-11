@@ -4,6 +4,8 @@
 import argparse
 import feedparser
 import requests
+import datetime
+from dateutil import parser
 
 from pathlib import PurePath, Path
 from pprint import pprint
@@ -40,7 +42,19 @@ def setID3Property(file, property=None, value=None):
   if value != None:
     subprocess.call([MUTAGEN, file, property, value])
   
-
+def useEpisodeWeek(podcast):
+  """If there's a publish date then convert that to week number and return that.
+     in future think a way of including the day in case there are multiple episodes
+     in a week.
+  """
+  if 'published' in podcast:
+    print(f"Published string is:{podcast['published']}")
+    datePublish = parser.parse(podcast['published'])
+    track = '%s-%s' % (datePublish.isocalendar().week, datePublish.isocalendar().weekday)
+    return track
+  else:
+    print(f"published key not found")
+    return None  #none doesn't break Roon but tracks become alphabetic of hashed names
   
 def getMedia(link, destination, series):
   """ Get the media file and store it in the destination.
@@ -82,13 +96,15 @@ def processRequest(url, destination, series, artists, episodes):
       podcast['artist'] = artists
     if series != "":
       podcast['series'] = series
-      
+    if 'published' in entry:
+      podcast['published'] = entry['published']
     if 'itunes_episode' in entry:
       podcast['track'] = entry['itunes_episode']
     elif 'episode' in entry:
       podcast['track'] = entry['episode']
     else:
-      podcast['track'] = None
+      podcast['track'] = useEpisodeWeek(podcast)
+      print(f"Episode Week {podcast['track']}")
       
     for link in entry['links']:
       if 'type' in link:
@@ -106,13 +122,13 @@ if __name__ == '__main__':
   #Main get the command line arguments and call processPodcast
   sys.stdin.reconfigure(encoding='utf-8')
   sys.stdout.reconfigure(encoding='utf-8')
-  parser = argparse.ArgumentParser(description='Import a podcast into a folder that Roon can stream from.')
-  parser.add_argument('url', help='URL of the podcast')
-  parser.add_argument('destination', help='folder to place the podcast')
-  parser.add_argument('series', default="", help='Series to place episodes.')
-  parser.add_argument('--artist', default='Artist', help='Set the Artist for the podcast.')
-  parser.add_argument('--episodes', type=int, default=1,
+  argParser = argparse.ArgumentParser(description='Import a podcast into a folder that Roon can stream from.')
+  argParser.add_argument('url', help='URL of the podcast')
+  argParser.add_argument('destination', help='folder to place the podcast')
+  argParser.add_argument('series', default="", help='Series to place episodes.')
+  argParser.add_argument('--artist', default='Artist', help='Set the Artist for the podcast.')
+  argParser.add_argument('--episodes', type=int, default=1,
                      help='How many episodes to fetch, the default is 1.')
-  args = parser.parse_args()
+  args = argParser.parse_args()
   
   processRequest(args.url, args.destination, args.series, args.artist, args.episodes)
