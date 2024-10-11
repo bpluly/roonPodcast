@@ -37,8 +37,8 @@ def validatePaths(destination, series):
 def setID3Property(file, property=None, value=None):
   """ Run the utility to set properties in the sound file.
   """
-  propertyString = property.join(value)
-  subprocess.call([MUTAGEN, file, property, value])
+  if value != None:
+    subprocess.call([MUTAGEN, file, property, value])
   
 
   
@@ -82,10 +82,14 @@ def processRequest(url, destination, series, artists, episodes):
       podcast['artist'] = artists
     if series != "":
       podcast['series'] = series
+      
     if 'itunes_episode' in entry:
       podcast['track'] = entry['itunes_episode']
-    else:
+    elif 'episode' in entry:
       podcast['track'] = entry['episode']
+    else:
+      podcast['track'] = None
+      
     for link in entry['links']:
       print(f"Link {link['type']} begins with {link['type'].startswith('audio')}")
       if 'type' in link:
