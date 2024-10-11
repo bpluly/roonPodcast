@@ -91,10 +91,9 @@ def processRequest(url, destination, series, artists, episodes):
       podcast['track'] = None
       
     for link in entry['links']:
-      print(f"Link {link['type']} begins with {link['type'].startswith('audio')}")
       if 'type' in link:
-        print('Creating image path')
         if link['type'].startswith("audio"):
+          print('Getting audio.')
           soundFileName = getMedia(link, destination, series)
           setID3Property(soundFileName, property=ARTIST, value=podcast['artist'])
           setID3Property(soundFileName, property=TRACK, value=podcast['track'])
