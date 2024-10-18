@@ -91,7 +91,10 @@ def processRequest(url, destination, series, artists, episodes):
     podcast = {}
     podcast['title'] = entry['title']
     if artists == 'Artist':
-      podcast['artist'] = entry['author']
+      if 'author' in entry:
+        podcast['artist'] = entry['author']
+      elif 'itunes_author' in entry:
+        podcast['artist'] = entry['itunes_author']
     else:
       podcast['artist'] = artists
     if series != "":
