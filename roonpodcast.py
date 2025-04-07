@@ -50,7 +50,7 @@ def useEpisodeWeek(podcast):
   if 'published' in podcast:
     print(f"Published string is:{podcast['published']}")
     datePublish = parser.parse(podcast['published'])
-    track = '%s-%s' % (datePublish.isocalendar().week, datePublish.isocalendar().weekday)
+    track = '%s%s' % (datePublish.isocalendar().week, datePublish.isocalendar().weekday)
     return track
   else:
     print(f"published key not found")
